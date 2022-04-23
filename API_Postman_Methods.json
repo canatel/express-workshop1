@@ -1,0 +1,155 @@
+{
+	"info": {
+		"_postman_id": "cbeb00de-84b5-4da2-8ba7-eed6461846e6",
+		"name": "Tasks API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Task",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"author\": \"Luis Canate\",\r\n    \"description\": \"This is a short description 3\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/tasks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "author",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Tasks",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/v1/tasks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a Task by Id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/v1/tasks/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"tasks",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete a Task by Id",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/v1/tasks/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"tasks",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a Task by Id",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/v1/tasks/0",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"tasks",
+						"0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a Task by Id",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/v1/tasks/0",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"tasks",
+						"0"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
