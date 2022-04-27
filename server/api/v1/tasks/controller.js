@@ -45,17 +45,55 @@ exports.read = (req, res, next) => {
   let task = tasks.filter((item) => item.id === params.id);
   task.length > 0
     ? res.json({
-        task,
-      })
+      task,
+    })
     : res.json({
-        message: "There is no task with the provided id.",
-      });
+      message: "There is no task with the provided id.",
+    });
 };
 
 exports.update = (req, res, next) => {
-  res.json({});
+  const { params = {}, body = {} } = req;
+  if (tasks.find((task) => task.id == params.id) === undefined) {
+    res.status(404);
+    res.json({
+      message: `Document with id ${params.id} does not exist`,
+    });
+  }
+  else {
+    let aux = tasks.findIndex((task) => task.id == params.id)
+    tasks[aux] = { ...tasks[aux], ...body }
+    tasks[aux].updatedAt = new Date()
+    fs.writeFileSync(filepath, JSON.stringify(tasks, null, 2));
+    res.json({
+      message: 'Document updated',
+      document: tasks[aux]
+    });
+  }
+
 };
 
 exports.delete = (req, res, next) => {
-  res.json({});
+  const { params = {} } = req;
+  if (tasks.find((task) => task.id == params.id) === undefined) {
+    res.status(404);
+    res.json({
+      message: `Document with id ${params.id} does not exist`,
+    });
+  }
+  else {
+    tasks = tasks.filter((task) => task.id !== params.id)
+    try {
+      fs.writeFileSync(filepath, JSON.stringify(tasks, null, 2));
+      res.json({
+        message: 'Task deleted'
+      });
+    } catch (error) {
+      res.status(500);
+      res.json({
+        message: "Error at delete tasnk",
+      });
+    }
+  }
+
 };
