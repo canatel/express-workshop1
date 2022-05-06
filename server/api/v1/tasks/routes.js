@@ -13,7 +13,7 @@ const controller = require("./controller");
  *
  */
 
-router.route("/").post(controller.create).get(controller.all);
+router.route("/").get(controller.all).post(controller.create);
 
 router
   .route("/:id")

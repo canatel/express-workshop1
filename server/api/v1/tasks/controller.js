@@ -1,99 +1,125 @@
-const fs = require("fs");
+const mongoose = require('mongoose');
+const TasksModel = require('./model')
+const { paginationParseParams, sortParseParams } = require('./../../../utils')
+const { Schema } = mongoose
 
-const filepath = "data.json";
+exports.all = async (req, res, next) => {
+  const { query = {} } = req;
+  const { limit, skip } = paginationParseParams(query);
+  const { sortBy, direction } = sortParseParams(query);
+  const populate = [
+    ...Object.getOwnPropertyNames({
+      author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+      }
+    })
+  ].join(' ');
 
-let tasks;
-
-try {
-  const data = fs.readFileSync(filepath, "utf-8");
-  tasks = JSON.parse(data);
-} catch (error) {
-  tasks = [];
-}
-
-exports.all = (req, res, next) => {
-  res.json({
-    tasks,
-  });
-};
-
-exports.create = (req, res, next) => {
-  const { body = {} } = req;
-  let task = {
-    id: `${tasks.length}`,
-    author: body.author,
-    description: body.description,
-    createdAt: new Date(),
-  };
-  tasks.push(task);
   try {
-    fs.writeFileSync(filepath, JSON.stringify(tasks, null, 2));
+    const [data = [], total = 0] = await Promise.all([
+      TasksModel.find({})
+        .limit(limit)
+        .skip(skip)
+        .sort({
+          [sortBy]: direction,
+        })
+        .populate(populate)
+        .exec(),
+      TasksModel.countDocuments(),
+    ]);
+
+    // const data = await Model.find({}).limit(limit).skip(skip).exec();
+    // const total = await Model.countDocuments();
+
     res.json({
-      message: "Task created successfully",
-      task,
+      data,
+      meta: {
+        limit,
+        skip,
+        total,
+        sortBy,
+        direction,
+      },
     });
   } catch (error) {
-    res.status(500);
-    res.json({
-      message: "Some error occurred while creating the task.",
-    });
+    next(error);
   }
 };
 
-exports.read = (req, res, next) => {
-  const { params = {} } = req;
-  let task = tasks.filter((item) => item.id === params.id);
-  task.length > 0
-    ? res.json({
-      task,
-    })
-    : res.json({
-      message: "There is no task with the provided id.",
+exports.create = async (req, res, next) => {
+  try {
+    const { body = {}, decoded = {} } = req;
+    const taskData = new TasksModel(body)
+    response = await taskData.save()
+    res.status(201);
+    res.json({
+      response
     });
+  } catch (error) {
+    console.log(error)
+    next(error);
+  }
 };
 
-exports.update = (req, res, next) => {
-  const { params = {}, body = {} } = req;
-  if (tasks.find((task) => task.id == params.id) === undefined) {
-    res.status(404);
-    res.json({
-      message: `Document with id ${params.id} does not exist`,
-    });
-  }
-  else {
-    let aux = tasks.findIndex((task) => task.id == params.id)
-    tasks[aux] = { ...tasks[aux], ...body }
-    tasks[aux].updatedAt = new Date()
-    fs.writeFileSync(filepath, JSON.stringify(tasks, null, 2));
-    res.json({
-      message: 'Document updated',
-      document: tasks[aux]
-    });
-  }
-
-};
-
-exports.delete = (req, res, next) => {
-  const { params = {} } = req;
-  if (tasks.find((task) => task.id == params.id) === undefined) {
-    res.status(404);
-    res.json({
-      message: `Document with id ${params.id} does not exist`,
-    });
-  }
-  else {
-    tasks = tasks.filter((task) => task.id !== params.id)
-    try {
-      fs.writeFileSync(filepath, JSON.stringify(tasks, null, 2));
+exports.read = async (req, res, next) => {
+  try {
+    const { params = {}, body = {} } = req;
+    console.log(params.id)
+    const response = await TasksModel.findById(params.id ?? '').exec()
+    if (response) {
+      res.status(200);
       res.json({
-        message: 'Task deleted'
-      });
-    } catch (error) {
-      res.status(500);
-      res.json({
-        message: "Error at delete tasnk",
+        response: response
       });
     }
+    else {
+      next({
+        statusCode: 404,
+        message: 'Document not found',
+      });
+    }
+  } catch (error) {
+    next(error);
   }
+};
 
+exports.update = async (req, res, next) => {
+  try {
+    const { body = {}, params = {} } = req;
+    const { id } = params;
+    const data = await TasksModel.findByIdAndUpdate(id, body, {
+      new: true,
+    });
+    res.json({
+      data,
+    });
+  } catch (error) {
+    next(error)
+  }
+};
+
+exports.delete = async (req, res, next) => {
+
+  const { params = {} } = req;
+  const { id } = params;
+
+  try {
+    const response = await TasksModel.findByIdAndDelete(id);
+    if (response) {
+      res.status(200);
+      res.json({
+        response: response
+      });
+    }
+    else {
+      next({
+        statusCode: 404,
+        message: 'Document not found',
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 };

@@ -16,6 +16,7 @@ app.use(express.json());
 app.use("/api/v1", api);
 
 app.use((req, res, next) => {
+  console.log(req)
   next({
     message: "Route not Found",
     statusCode: 404,

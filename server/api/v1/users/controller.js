@@ -55,7 +55,6 @@ exports.create = async (req, res, next) => {
 exports.read = async (req, res, next) => {
     try {
         const { params = {}, body = {} } = req;
-        console.log(params.id ?? '')
         const response = await UserModel.findById(params.id ?? '').exec()
         if (response) {
             res.status(200);
