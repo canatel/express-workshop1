@@ -1,5 +1,6 @@
 const UserModel = require('./model')
 const { paginationParseParams, sortParseParams } = require('./../../../utils')
+const { signToken } = require('../auth');
 
 exports.all = async (req, res, next) => {
     const { query = {} } = req;
@@ -32,6 +33,76 @@ exports.all = async (req, res, next) => {
         });
     } catch (error) {
         console.log(error)
+        next(error);
+    }
+};
+
+exports.id = async (req, res, next) => {
+    const { params = {} } = req;
+    const { id = '' } = params;
+
+    try {
+        const data = await UserModel.findById(id).exec();
+
+        if (data) {
+            req.doc = data;
+            next();
+        } else {
+            next({
+                statusCode: 404,
+                message: 'Document not found',
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.signin = async (req, res, next) => {
+    const { body = {} } = req;
+    const { username = '', password = '' } = body;
+
+    const document = await UserModel.findOne({ username });
+
+    if (document) {
+        const verified = await document.verifyPassword(password);
+        if (verified) {
+            const payload = {
+                id: document._id,
+            };
+            const token = signToken(payload);
+
+            res.json({
+                data: document,
+                meta: {
+                    token,
+                },
+            });
+        } else {
+            next({
+                message: 'Username or password are incorrect',
+            });
+        }
+    } else {
+        next({
+            message: 'Username or password are incorrect',
+        });
+    }
+};
+
+exports.signup = async (req, res, next) => {
+    const { body = {} } = req;
+
+    const document = new UserModel(body);
+
+    try {
+        const data = await document.save();
+
+        res.status(201);
+        res.json({
+            data,
+        });
+    } catch (error) {
         next(error);
     }
 };

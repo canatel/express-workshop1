@@ -1,8 +1,14 @@
 const express = require("express");
 const cors = require('cors');
 const api = require("./api/v1");
+const config = require('./config');
+const jwt = require('jsonwebtoken')
+
 
 const app = express();
+
+
+app.set('key', config.token.secret);
 
 app.use(
   cors({
@@ -16,7 +22,6 @@ app.use(express.json());
 app.use("/api/v1", api);
 
 app.use((req, res, next) => {
-  console.log(req)
   next({
     message: "Route not Found",
     statusCode: 404,

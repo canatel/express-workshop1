@@ -1,6 +1,7 @@
 const express = require("express");
 // eslint-disable-next-line
 const router = express.Router();
+const { auth, owner } = require('../auth');
 
 const controller = require("./controller");
 
@@ -13,13 +14,15 @@ const controller = require("./controller");
  *
  */
 
-router.route("/").get(controller.all).post(controller.create);
+router.route("/").get(controller.all).post(auth, controller.create);
+
+router.param('id', controller.id);
 
 router
   .route("/:id")
   .get(controller.read)
-  .put(controller.update)
-  .patch(controller.update)
-  .delete(controller.delete);
+  .put(auth, owner, controller.update)
+  .patch(auth, owner, controller.update)
+  .delete(auth, owner, controller.delete);
 
 module.exports = router;
